@@ -2,7 +2,8 @@
     ┌─────────────────────────────────────────────┐
     │      LONEX SCRIPT GUI   v1.0.0              │
     │      Dark Purple + Light Blue Theme         │
-    │      Fully aligned layout                   │
+    │      + Steal an Egg Auto Steal              │
+    │      + Close (X) Button                     │
     └─────────────────────────────────────────────┘
 --]]
 
@@ -193,11 +194,12 @@ new("TextLabel", {
     TextTruncate = Enum.TextTruncate.AtEnd,
 })
 
+-- Versiyon (X butonuna yer bırakmak için biraz kısaltıldı)
 new("TextLabel", {
     Parent = Header,
     BackgroundTransparency = 1,
     Position = UDim2.new(0.7, 0, 0, 0),
-    Size = UDim2.new(0.3, -L.PadX, 1, 0),
+    Size = UDim2.new(0.3, -L.PadX - 34, 1, 0),
     Text = CONFIG.Version,
     TextColor3 = C.Accent2,
     Font = Enum.Font.GothamBold,
@@ -206,6 +208,40 @@ new("TextLabel", {
 })
 
 draggable(Main, Header)
+
+-- ==================== X (KAPAT) BUTONU ====================
+local CloseBtn = new("TextButton", {
+    Parent = Main,
+    Size = UDim2.new(0, 26, 0, 26),
+    Position = UDim2.new(1, -34, 0, 10),
+    BackgroundColor3 = C.Panel3,
+    Text = "✕",
+    TextColor3 = C.Red,
+    Font = Enum.Font.GothamBold,
+    TextSize = 15,
+    AutoButtonColor = false,
+    BorderSizePixel = 0,
+    ZIndex = 20,
+})
+corner(CloseBtn, 8)
+stroke(CloseBtn, 1.2, 0.2, C.Purple, C.Red)
+
+CloseBtn.MouseEnter:Connect(function()
+    Tween:Create(CloseBtn, TweenInfo.new(0.15), {
+        BackgroundColor3 = C.Red,
+    }):Play()
+    CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+end)
+CloseBtn.MouseLeave:Connect(function()
+    Tween:Create(CloseBtn, TweenInfo.new(0.15), {
+        BackgroundColor3 = C.Panel3,
+    }):Play()
+    CloseBtn.TextColor3 = C.Red
+end)
+CloseBtn.MouseButton1Click:Connect(function()
+    SG:Destroy()
+    print("[Lonex Script] GUI tamamen kaldırıldı.")
+end)
 
 -- ==================== SIDEBAR ====================
 local Sidebar = new("Frame", {
@@ -275,7 +311,6 @@ new("UIListLayout", {
     Padding = UDim.new(0, 6),
 })
 
--- Discord ikonu: blurple kutu + beyaz "Clyde" yüzü
 local DIcon = new("Frame", {
     Parent = DBox,
     Size = UDim2.new(0, 22, 0, 22),
@@ -285,7 +320,6 @@ local DIcon = new("Frame", {
 })
 corner(DIcon, 6)
 
--- Sol göz
 local eyeL = new("Frame", {
     Parent = DIcon,
     Size = UDim2.new(0, 4, 0, 4),
@@ -295,7 +329,6 @@ local eyeL = new("Frame", {
 })
 corner(eyeL, 2)
 
--- Sağ göz
 local eyeR = new("Frame", {
     Parent = DIcon,
     Size = UDim2.new(0, 4, 0, 4),
@@ -305,7 +338,6 @@ local eyeR = new("Frame", {
 })
 corner(eyeR, 2)
 
--- Ağız
 local mouth = new("Frame", {
     Parent = DIcon,
     Size = UDim2.new(0, 10, 0, 3),
@@ -315,7 +347,6 @@ local mouth = new("Frame", {
 })
 corner(mouth, 2)
 
--- Discord yazısı
 local DText = new("TextButton", {
     Parent = DBox,
     BackgroundTransparency = 1,
@@ -330,7 +361,6 @@ local DText = new("TextButton", {
     LayoutOrder = 2,
 })
 
--- Copy butonu — Discord yazısının TAM SAĞINDA
 local CopyBtn = new("TextButton", {
     Parent = DBox,
     Size = UDim2.new(0, 56, 0, 22),
@@ -375,7 +405,6 @@ new("UIListLayout", {
     Padding = UDim.new(0, 6),
 })
 
--- YouTube ikonu: kırmızı yuvarlak kutu + beyaz üçgen
 local YIcon = new("Frame", {
     Parent = YBox,
     Size = UDim2.new(0, 28, 0, 20),
@@ -696,23 +725,252 @@ end
 -- ==================== KATEGORİLER ====================
 createCategory("Main")
 createCategory("Misc")
+createCategory("Steal an Egg")
 
-do
-    local _, body = createAccordion(pages.Main, "Speed")
-    createToggleInput(body, {
-        label = "Hız (1 - 1200)",
-        min = 1, max = 1200, default = 16,
-        onChanged = function(en, val) print("[Lonex] Speed:", en, val) end,
-    })
+-- ==================== STEAL AN EGG FONKSİYONLARI ====================
+local StealAnEgg = {}
+
+function StealAnEgg.getHRP()
+    local char = LP.Character
+    if not char then return nil end
+    return char:FindFirstChild("HumanoidRootPart") or char.PrimaryPart
 end
 
+function StealAnEgg.isCarryingEgg()
+    local pg = LP:FindFirstChildOfClass("PlayerGui")
+    local dropGui = pg and pg:FindFirstChild("DropHeldEgg")
+    return dropGui and dropGui.Enabled == true
+end
+
+function StealAnEgg.findEggPrompts()
+    local prompts = {}
+    for _, d in ipairs(workspace:GetDescendants()) do
+        if d:IsA("ProximityPrompt") and d.Name == "CarryAreaEgg" and d.Enabled then
+            table.insert(prompts, d)
+        end
+    end
+    return prompts
+end
+
+function StealAnEgg.travelTo(destination, speed)
+    local hrp = StealAnEgg.getHRP()
+    if not hrp then return false end
+
+    local distance = (destination - hrp.Position).Magnitude
+    if distance < 1 then return true end
+
+    local duration = distance / (speed or 100)
+    local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
+    local goal = { CFrame = CFrame.new(destination) }
+    local tween = Tween:Create(hrp, tweenInfo, goal)
+
+    hrp.AssemblyLinearVelocity = Vector3.zero
+    hrp.AssemblyAngularVelocity = Vector3.zero
+
+    tween:Play()
+    tween.Completed:Wait()
+    return true
+end
+
+function StealAnEgg.stealEgg(speed, biomeName)
+    local prompts = StealAnEgg.findEggPrompts()
+    if #prompts == 0 then return false end
+
+    local hrp = StealAnEgg.getHRP()
+    if not hrp then return false end
+
+    local targetPrompt = nil
+    local minDist = math.huge
+
+    for _, prompt in ipairs(prompts) do
+        local parent = prompt.Parent
+        if parent then
+            local matchesBiome = true
+            if biomeName and biomeName ~= "Any" then
+                matchesBiome = parent.Name:lower():find(biomeName:lower()) ~= nil
+            end
+
+            if matchesBiome then
+                local pos = parent.Position
+                local dist = (pos - hrp.Position).Magnitude
+                if dist < minDist then
+                    minDist = dist
+                    targetPrompt = prompt
+                end
+            end
+        end
+    end
+
+    if not targetPrompt then return false end
+
+    local eggPos = targetPrompt.Parent.Position
+    if not StealAnEgg.travelTo(eggPos, speed or 100) then return false end
+
+    task.wait(0.1)
+    if targetPrompt.Enabled then
+        pcall(function()
+            fireproximityprompt(targetPrompt)
+        end)
+    end
+
+    task.wait(0.2)
+    return StealAnEgg.isCarryingEgg()
+end
+
+function StealAnEgg.returnToBase(speed)
+    local hrp = StealAnEgg.getHRP()
+    if not hrp then return false end
+
+    local basePos = hrp.Position + Vector3.new(0, 50, 0)
+    return StealAnEgg.travelTo(basePos, speed or 150)
+end
+
+-- ==================== STEAL AN EGG GUI ====================
 do
-    local _, body = createAccordion(pages.Misc, "Örnek Özellik")
-    createToggleInput(body, {
-        label = "Değer",
-        min = 1, max = 1200, default = 50,
-        onChanged = function(en, val) print("[Lonex] Misc:", en, val) end,
+    local _, body = createAccordion(pages["Steal an Egg"], "Auto Steal")
+
+    local autoStealEnabled = false
+    local autoStealSpeed = 100
+
+    local row = new("Frame", {
+        Parent = body,
+        Size = UDim2.new(1, 0, 0, 26),
+        BackgroundTransparency = 1,
     })
+
+    local lbl = new("TextLabel", {
+        Parent = row,
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0, 4, 0, 0),
+        Size = UDim2.new(1, -130, 1, 0),
+        Text = "Auto Steal (Hız)",
+        TextColor3 = C.TextDim,
+        Font = Enum.Font.GothamMedium,
+        TextSize = 12,
+        TextXAlignment = Enum.TextXAlignment.Left,
+    })
+
+    local toggle = new("TextButton", {
+        Parent = row,
+        Size = UDim2.new(0, 42, 0, 22),
+        Position = UDim2.new(1, -118, 0.5, -11),
+        BackgroundColor3 = C.Panel,
+        Text = "",
+        AutoButtonColor = false,
+        BorderSizePixel = 0,
+    })
+    corner(toggle, 11)
+    stroke(toggle, 1.2, 0.3, C.Purple, C.Accent)
+
+    local dot = new("Frame", {
+        Parent = toggle,
+        Size = UDim2.new(0, 16, 0, 16),
+        Position = UDim2.new(0, 3, 0.5, -8),
+        BackgroundColor3 = C.TextDim,
+        BorderSizePixel = 0,
+    })
+    corner(dot, 8)
+
+    local input = new("TextBox", {
+        Parent = row,
+        Size = UDim2.new(0, 68, 0, 22),
+        Position = UDim2.new(1, -68, 0.5, -11),
+        BackgroundColor3 = C.Panel,
+        Text = "100",
+        TextColor3 = C.Text,
+        Font = Enum.Font.GothamBold,
+        TextSize = 12,
+        BorderSizePixel = 0,
+        ClearTextOnFocus = false,
+        PlaceholderText = "Hız",
+        PlaceholderColor3 = C.TextDim,
+    })
+    corner(input, 6)
+    stroke(input, 1, 0.4, C.Purple, C.Accent)
+
+    local biomeFrame = new("Frame", {
+        Parent = body,
+        Size = UDim2.new(1, 0, 0, 30),
+        BackgroundTransparency = 1,
+    })
+    new("UIListLayout", {
+        Parent = biomeFrame,
+        FillDirection = Enum.FillDirection.Horizontal,
+        Padding = UDim.new(0, 6),
+        SortOrder = Enum.SortOrder.LayoutOrder,
+    })
+
+    local selectedBiome = "Any"
+    local biomes = {"Any", "Forest", "Lake", "Desert", "Jungle"}
+
+    for i, bName in ipairs(biomes) do
+        local bBtn = new("TextButton", {
+            Parent = biomeFrame,
+            Size = UDim2.new(0, 60, 1, 0),
+            BackgroundColor3 = (bName == "Any") and C.Panel3 or C.Panel2,
+            Text = bName,
+            TextColor3 = (bName == "Any") and C.Accent or C.TextDim,
+            Font = Enum.Font.GothamBold,
+            TextSize = 11,
+            AutoButtonColor = false,
+            BorderSizePixel = 0,
+            LayoutOrder = i,
+        })
+        corner(bBtn, 6)
+        stroke(bBtn, 1, 0.5, C.Purple, C.Accent)
+
+        bBtn.MouseButton1Click:Connect(function()
+            selectedBiome = bName
+            for _, btn in ipairs(biomeFrame:GetChildren()) do
+                if btn:IsA("TextButton") then
+                    if btn.Text == bName then
+                        btn.BackgroundColor3 = C.Panel3
+                        btn.TextColor3 = C.Accent
+                    else
+                        btn.BackgroundColor3 = C.Panel2
+                        btn.TextColor3 = C.TextDim
+                    end
+                end
+            end
+        end)
+    end
+
+    task.spawn(function()
+        while task.wait(0.5) do
+            if autoStealEnabled then
+                if not StealAnEgg.isCarryingEgg() then
+                    pcall(function()
+                        StealAnEgg.stealEgg(autoStealSpeed, selectedBiome)
+                    end)
+                end
+
+                if StealAnEgg.isCarryingEgg() then
+                    pcall(function()
+                        StealAnEgg.returnToBase(autoStealSpeed + 100)
+                    end)
+                end
+            end
+        end
+    end)
+
+    toggle.MouseButton1Click:Connect(function()
+        autoStealEnabled = not autoStealEnabled
+        Tween:Create(dot, TweenInfo.new(0.15, Enum.EasingStyle.Quad), {
+            Position = autoStealEnabled
+                and UDim2.new(0, 23, 0.5, -8)
+                or  UDim2.new(0, 3, 0.5, -8),
+            BackgroundColor3 = autoStealEnabled and C.Green or C.TextDim,
+        }):Play()
+        toggle.BackgroundColor3 = autoStealEnabled and C.Panel3 or C.Panel
+        lbl.TextColor3 = autoStealEnabled and C.Accent or C.TextDim
+    end)
+
+    input.FocusLost:Connect(function()
+        local n = tonumber(input.Text) or 100
+        n = math.clamp(math.floor(n), 10, 1500)
+        autoStealSpeed = n
+        input.Text = tostring(n)
+    end)
 end
 
 -- ==================== BAŞLANGIÇ ====================
@@ -735,3 +993,5 @@ ToggleBtn.MouseButton1Click:Connect(function()
 end)
 
 print("[Lonex Script] GUI yüklendi - " .. CONFIG.Version)
+print("[Lonex Script] Steal an Egg otomasyonu aktif.")
+print("[Lonex Script] X butonu ile script tamamen kaldırılabilir.")
