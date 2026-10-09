@@ -2,6 +2,7 @@
     ┌─────────────────────────────────────────────┐
     │      LONEX SCRIPT GUI   v1.0.0              │
     │      Dark Purple + Light Blue Theme         │
+    │      Fully aligned layout                   │
     └─────────────────────────────────────────────┘
 --]]
 
@@ -22,10 +23,6 @@ local CONFIG = {
     DiscordName = "Discord",
     DiscordLink = "https://discord.gg/xBUjnC4Ksc",
     YouTubeName = "Lonex Script",
-
-    -- ⚠️ Logo assetleri: yüklenmezse kendi upload'ınla değiştir
-    DiscordLogo = "rbxassetid://6750787032",
-    YouTubeLogo = "rbxassetid://6031075932",
 }
 
 do
@@ -48,7 +45,7 @@ local C = {
     Yellow  = Color3.fromRGB(255, 200, 80),
     Red     = Color3.fromRGB(255, 90, 90),
     Discord = Color3.fromRGB(88, 101, 242),
-    YouTube = Color3.fromRGB(255, 40, 40),
+    YouTube = Color3.fromRGB(255, 0, 0),
 }
 
 -- ==================== LAYOUT ====================
@@ -263,7 +260,7 @@ new("Frame", {
     BorderSizePixel = 0,
 })
 
--- ---------- SOL: DISCORD (ikon + yazı + copy yan yana) ----------
+-- ---------- SOL: DISCORD ----------
 local DBox = new("Frame", {
     Parent = Footer,
     BackgroundTransparency = 1,
@@ -278,18 +275,47 @@ new("UIListLayout", {
     Padding = UDim.new(0, 6),
 })
 
--- Discord logosu (gerçek ikon)
-local DIcon = new("ImageLabel", {
+-- Discord ikonu: blurple kutu + beyaz "Clyde" yüzü
+local DIcon = new("Frame", {
     Parent = DBox,
     Size = UDim2.new(0, 22, 0, 22),
-    BackgroundTransparency = 1,
-    Image = CONFIG.DiscordLogo,
-    ImageColor3 = C.Discord,
-    ScaleType = Enum.ScaleType.Fit,
+    BackgroundColor3 = C.Discord,
+    BorderSizePixel = 0,
     LayoutOrder = 1,
 })
+corner(DIcon, 6)
 
--- Discord yazısı (auto width)
+-- Sol göz
+local eyeL = new("Frame", {
+    Parent = DIcon,
+    Size = UDim2.new(0, 4, 0, 4),
+    Position = UDim2.new(0, 5, 0, 5),
+    BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+    BorderSizePixel = 0,
+})
+corner(eyeL, 2)
+
+-- Sağ göz
+local eyeR = new("Frame", {
+    Parent = DIcon,
+    Size = UDim2.new(0, 4, 0, 4),
+    Position = UDim2.new(1, -9, 0, 5),
+    BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+    BorderSizePixel = 0,
+})
+corner(eyeR, 2)
+
+-- Ağız
+local mouth = new("Frame", {
+    Parent = DIcon,
+    Size = UDim2.new(0, 10, 0, 3),
+    Position = UDim2.new(0.5, -5, 1, -8),
+    BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+    BorderSizePixel = 0,
+})
+corner(mouth, 2)
+
+-- Discord yazısı
 local DText = new("TextButton", {
     Parent = DBox,
     BackgroundTransparency = 1,
@@ -333,7 +359,7 @@ end
 CopyBtn.MouseButton1Click:Connect(doCopy)
 DText.MouseButton1Click:Connect(doCopy)
 
--- ---------- ORTA: YOUTUBE (ikon + yazı) ----------
+-- ---------- ORTA: YOUTUBE ----------
 local YBox = new("Frame", {
     Parent = Footer,
     BackgroundTransparency = 1,
@@ -349,15 +375,26 @@ new("UIListLayout", {
     Padding = UDim.new(0, 6),
 })
 
--- YouTube logosu (gerçek ikon)
-local YIcon = new("ImageLabel", {
+-- YouTube ikonu: kırmızı yuvarlak kutu + beyaz üçgen
+local YIcon = new("Frame", {
     Parent = YBox,
-    Size = UDim2.new(0, 26, 0, 22),
-    BackgroundTransparency = 1,
-    Image = CONFIG.YouTubeLogo,
-    ImageColor3 = Color3.fromRGB(255, 255, 255),
-    ScaleType = Enum.ScaleType.Fit,
+    Size = UDim2.new(0, 28, 0, 20),
+    BackgroundColor3 = C.YouTube,
+    BorderSizePixel = 0,
     LayoutOrder = 1,
+})
+corner(YIcon, 5)
+
+new("TextLabel", {
+    Parent = YIcon,
+    BackgroundTransparency = 1,
+    Size = UDim2.new(1, 0, 1, 0),
+    Text = "▶",
+    TextColor3 = Color3.fromRGB(255, 255, 255),
+    Font = Enum.Font.GothamBold,
+    TextSize = 13,
+    TextYAlignment = Enum.TextYAlignment.Center,
+    TextXAlignment = Enum.TextXAlignment.Center,
 })
 
 new("TextLabel", {
