@@ -2,7 +2,6 @@
     ┌─────────────────────────────────────────────┐
     │      LONEX SCRIPT GUI   v1.0.0              │
     │      Dark Purple + Light Blue Theme         │
-    │      Fully aligned layout                   │
     └─────────────────────────────────────────────┘
 --]]
 
@@ -23,6 +22,10 @@ local CONFIG = {
     DiscordName = "Discord",
     DiscordLink = "https://discord.gg/xBUjnC4Ksc",
     YouTubeName = "Lonex Script",
+
+    -- ⚠️ Logo assetleri: yüklenmezse kendi upload'ınla değiştir
+    DiscordLogo = "rbxassetid://6750787032",
+    YouTubeLogo = "rbxassetid://6031075932",
 }
 
 do
@@ -50,13 +53,13 @@ local C = {
 
 -- ==================== LAYOUT ====================
 local L = {
-    PanelW    = 640,
-    PanelH    = 440,
-    HeaderH   = 46,
-    FooterH   = 46,
-    SidebarW  = 150,
-    PadX      = 14,   -- yatay iç boşluk
-    Radius    = 14,
+    PanelW   = 640,
+    PanelH   = 440,
+    HeaderH  = 46,
+    FooterH  = 46,
+    SidebarW = 150,
+    PadX     = 14,
+    Radius   = 14,
 }
 
 -- ==================== HELPERS ====================
@@ -152,8 +155,7 @@ local Main = new("Frame", {
 corner(Main, L.Radius)
 stroke(Main, 2.2, 0, C.Purple, C.Accent)
 
--- ==================== HEADER (ÜST BAR) ====================
---   [ Lonex Script ]     [ Oyun İsmi ]     [ v1.0.0 ]
+-- ==================== HEADER ====================
 local Header = new("Frame", {
     Parent = Main,
     Size = UDim2.new(1, 0, 0, L.HeaderH),
@@ -161,7 +163,7 @@ local Header = new("Frame", {
     BorderSizePixel = 0,
 })
 corner(Header, L.Radius)
-new("Frame", {  -- alt köşeleri düzleştir
+new("Frame", {
     Parent = Header,
     Size = UDim2.new(1, 0, 0, L.Radius),
     Position = UDim2.new(0, 0, 1, -L.Radius),
@@ -169,8 +171,7 @@ new("Frame", {  -- alt köşeleri düzleştir
     BorderSizePixel = 0,
 })
 
--- Sol: Yaratıcı
-local HeaderLeft = new("TextLabel", {
+new("TextLabel", {
     Parent = Header,
     BackgroundTransparency = 1,
     Position = UDim2.new(0, L.PadX, 0, 0),
@@ -182,8 +183,7 @@ local HeaderLeft = new("TextLabel", {
     TextXAlignment = Enum.TextXAlignment.Left,
 })
 
--- Orta: Oyun İsmi
-local HeaderCenter = new("TextLabel", {
+new("TextLabel", {
     Parent = Header,
     BackgroundTransparency = 1,
     Position = UDim2.new(0.3, 0, 0, 0),
@@ -196,8 +196,7 @@ local HeaderCenter = new("TextLabel", {
     TextTruncate = Enum.TextTruncate.AtEnd,
 })
 
--- Sağ: Versiyon
-local HeaderRight = new("TextLabel", {
+new("TextLabel", {
     Parent = Header,
     BackgroundTransparency = 1,
     Position = UDim2.new(0.7, 0, 0, 0),
@@ -211,7 +210,7 @@ local HeaderRight = new("TextLabel", {
 
 draggable(Main, Header)
 
--- ==================== SIDEBAR (KATEGORİLER) ====================
+-- ==================== SIDEBAR ====================
 local Sidebar = new("Frame", {
     Parent = Main,
     Position = UDim2.new(0, 0, 0, L.HeaderH),
@@ -225,10 +224,7 @@ new("UIListLayout", {
     Padding = UDim.new(0, 6),
     HorizontalAlignment = Enum.HorizontalAlignment.Center,
 })
-new("UIPadding", {
-    Parent = Sidebar,
-    PaddingTop = UDim.new(0, 12),
-})
+new("UIPadding", { Parent = Sidebar, PaddingTop = UDim.new(0, 12) })
 
 -- ==================== CONTENT ====================
 local Content = new("ScrollingFrame", {
@@ -250,8 +246,7 @@ new("UIPadding", {
     PaddingRight = UDim.new(0, 10),
 })
 
--- ==================== FOOTER (ALT BAR) ====================
---  [ Discord 🔗 Copy ]   [ ▶ YouTube Lonex Script ]   [ FPS / Ping ]
+-- ==================== FOOTER ====================
 local Footer = new("Frame", {
     Parent = Main,
     Position = UDim2.new(0, 0, 1, -L.FooterH),
@@ -260,7 +255,7 @@ local Footer = new("Frame", {
     BorderSizePixel = 0,
 })
 corner(Footer, L.Radius)
-new("Frame", {  -- üst köşeleri düzleştir
+new("Frame", {
     Parent = Footer,
     Size = UDim2.new(1, 0, 0, L.Radius),
     Position = UDim2.new(0, 0, 0, 0),
@@ -268,38 +263,51 @@ new("Frame", {  -- üst köşeleri düzleştir
     BorderSizePixel = 0,
 })
 
--- ---------- SOL: Discord ----------
+-- ---------- SOL: DISCORD (ikon + yazı + copy yan yana) ----------
 local DBox = new("Frame", {
     Parent = Footer,
     BackgroundTransparency = 1,
     Position = UDim2.new(0, L.PadX, 0.5, -12),
-    Size = UDim2.new(0.35, -L.PadX, 0, 24),
+    Size = UDim2.new(0, 220, 0, 24),
+})
+new("UIListLayout", {
+    Parent = DBox,
+    FillDirection = Enum.FillDirection.Horizontal,
+    VerticalAlignment = Enum.VerticalAlignment.Center,
+    SortOrder = Enum.SortOrder.LayoutOrder,
+    Padding = UDim.new(0, 6),
 })
 
--- Discord ikonu (D harfli kutu)
-local DIcon = new("Frame", {
+-- Discord logosu (gerçek ikon)
+local DIcon = new("ImageLabel", {
     Parent = DBox,
     Size = UDim2.new(0, 22, 0, 22),
-    Position = UDim2.new(0, 0, 0.5, -11),
-    BackgroundColor3 = C.Discord,
-    BorderSizePixel = 0,
-})
-corner(DIcon, 6)
-new("TextLabel", {
-    Parent = DIcon,
-    Size = UDim2.new(1, 0, 1, 0),
     BackgroundTransparency = 1,
-    Text = "D",
-    TextColor3 = Color3.fromRGB(255, 255, 255),
-    Font = Enum.Font.GothamBlack,
-    TextSize = 13,
+    Image = CONFIG.DiscordLogo,
+    ImageColor3 = C.Discord,
+    ScaleType = Enum.ScaleType.Fit,
+    LayoutOrder = 1,
 })
 
--- Copy butonu
+-- Discord yazısı (auto width)
+local DText = new("TextButton", {
+    Parent = DBox,
+    BackgroundTransparency = 1,
+    Size = UDim2.new(0, 0, 0, 22),
+    AutomaticSize = Enum.AutomaticSize.X,
+    Text = CONFIG.DiscordName,
+    TextColor3 = C.Text,
+    Font = Enum.Font.GothamMedium,
+    TextSize = 13,
+    TextXAlignment = Enum.TextXAlignment.Left,
+    AutoButtonColor = false,
+    LayoutOrder = 2,
+})
+
+-- Copy butonu — Discord yazısının TAM SAĞINDA
 local CopyBtn = new("TextButton", {
     Parent = DBox,
     Size = UDim2.new(0, 56, 0, 22),
-    Position = UDim2.new(1, -56, 0.5, -11),
     BackgroundColor3 = C.Panel3,
     Text = "Copy",
     TextColor3 = C.Accent,
@@ -307,24 +315,10 @@ local CopyBtn = new("TextButton", {
     TextSize = 11,
     AutoButtonColor = false,
     BorderSizePixel = 0,
+    LayoutOrder = 3,
 })
 corner(CopyBtn, 6)
 stroke(CopyBtn, 1, 0.3, C.Purple, C.Accent)
-
--- Yazı (ikon ile copy arasında tam ortalanır)
-local DText = new("TextButton", {
-    Parent = DBox,
-    BackgroundTransparency = 1,
-    Position = UDim2.new(0, 30, 0, 0),
-    Size = UDim2.new(1, -30 - 62, 1, 0),
-    Text = CONFIG.DiscordName,
-    TextColor3 = C.Text,
-    Font = Enum.Font.GothamMedium,
-    TextSize = 13,
-    TextXAlignment = Enum.TextXAlignment.Left,
-    AutoButtonColor = false,
-    TextTruncate = Enum.TextTruncate.AtEnd,
-})
 
 local function doCopy()
     local okCopy = pcall(function()
@@ -339,53 +333,53 @@ end
 CopyBtn.MouseButton1Click:Connect(doCopy)
 DText.MouseButton1Click:Connect(doCopy)
 
--- ---------- ORTA: YouTube ----------
+-- ---------- ORTA: YOUTUBE (ikon + yazı) ----------
 local YBox = new("Frame", {
     Parent = Footer,
     BackgroundTransparency = 1,
     AnchorPoint = Vector2.new(0.5, 0.5),
     Position = UDim2.new(0.5, 0, 0.5, 0),
-    Size = UDim2.new(0.3, 0, 0, 24),
+    Size = UDim2.new(0, 200, 0, 24),
+})
+new("UIListLayout", {
+    Parent = YBox,
+    FillDirection = Enum.FillDirection.Horizontal,
+    VerticalAlignment = Enum.VerticalAlignment.Center,
+    SortOrder = Enum.SortOrder.LayoutOrder,
+    Padding = UDim.new(0, 6),
 })
 
-local YIcon = new("Frame", {
+-- YouTube logosu (gerçek ikon)
+local YIcon = new("ImageLabel", {
     Parent = YBox,
-    Size = UDim2.new(0, 26, 0, 20),
-    Position = UDim2.new(0, 0, 0.5, -10),
-    BackgroundColor3 = C.YouTube,
-    BorderSizePixel = 0,
-})
-corner(YIcon, 5)
-new("TextLabel", {
-    Parent = YIcon,
-    Size = UDim2.new(1, 0, 1, 0),
+    Size = UDim2.new(0, 26, 0, 22),
     BackgroundTransparency = 1,
-    Text = "▶",
-    TextColor3 = Color3.fromRGB(255, 255, 255),
-    Font = Enum.Font.GothamBold,
-    TextSize = 11,
+    Image = CONFIG.YouTubeLogo,
+    ImageColor3 = Color3.fromRGB(255, 255, 255),
+    ScaleType = Enum.ScaleType.Fit,
+    LayoutOrder = 1,
 })
 
 new("TextLabel", {
     Parent = YBox,
     BackgroundTransparency = 1,
-    Position = UDim2.new(0, 32, 0, 0),
-    Size = UDim2.new(1, -32, 1, 0),
+    Size = UDim2.new(0, 0, 0, 22),
+    AutomaticSize = Enum.AutomaticSize.X,
     Text = "YouTube  " .. CONFIG.YouTubeName,
     TextColor3 = C.Text,
     Font = Enum.Font.GothamMedium,
     TextSize = 13,
     TextXAlignment = Enum.TextXAlignment.Left,
-    TextTruncate = Enum.TextTruncate.AtEnd,
+    LayoutOrder = 2,
 })
 
--- ---------- SAĞ: FPS / Ping ----------
+-- ---------- SAĞ: FPS / PING ----------
 local SBox = new("Frame", {
     Parent = Footer,
     BackgroundTransparency = 1,
     AnchorPoint = Vector2.new(1, 0.5),
     Position = UDim2.new(1, -L.PadX, 0.5, 0),
-    Size = UDim2.new(0.35, -L.PadX, 0, 24),
+    Size = UDim2.new(0, 180, 0, 24),
 })
 
 local FPSLbl = new("TextLabel", {
@@ -412,7 +406,6 @@ local PingLbl = new("TextLabel", {
     TextXAlignment = Enum.TextXAlignment.Right,
 })
 
--- FPS döngüsü
 do
     local frames, last, fps = 0, tick(), 60
     RS.RenderStepped:Connect(function()
@@ -428,7 +421,6 @@ do
     end)
 end
 
--- Ping döngüsü
 task.spawn(function()
     while task.wait(1) do
         local okP, ping = pcall(function()
@@ -448,9 +440,7 @@ local pages, current = {}, nil
 local function setCategory(name)
     if current == name then return end
     current = name
-    for n, p in pairs(pages) do
-        p.Visible = (n == name)
-    end
+    for n, p in pairs(pages) do p.Visible = (n == name) end
 end
 
 local function createCategory(name)
@@ -498,7 +488,7 @@ local function createCategory(name)
     return page
 end
 
--- ==================== ACCORDION (AÇILIR BUTON) ====================
+-- ==================== ACCORDION ====================
 local function createAccordion(parent, title)
     local container = new("Frame", {
         Parent = parent,
@@ -509,10 +499,7 @@ local function createAccordion(parent, title)
     })
     corner(container, 8)
     stroke(container, 1.2, 0.4, C.Purple, C.Accent)
-    new("UIListLayout", {
-        Parent = container,
-        SortOrder = Enum.SortOrder.LayoutOrder,
-    })
+    new("UIListLayout", { Parent = container, SortOrder = Enum.SortOrder.LayoutOrder })
 
     local header = new("TextButton", {
         Parent = container,
@@ -562,8 +549,8 @@ local function createAccordion(parent, title)
     new("UIPadding", {
         Parent = body,
         PaddingBottom = UDim.new(0, 8),
-        PaddingLeft   = UDim.new(0, 10),
-        PaddingRight  = UDim.new(0, 10),
+        PaddingLeft = UDim.new(0, 10),
+        PaddingRight = UDim.new(0, 10),
     })
 
     local open = false
@@ -576,7 +563,7 @@ local function createAccordion(parent, title)
     return container, body
 end
 
--- ==================== TOGGLE + SAYI INPUT ====================
+-- ==================== TOGGLE + INPUT ====================
 local function createToggleInput(parent, opts)
     opts = opts or {}
     local row = new("Frame", {
@@ -586,7 +573,7 @@ local function createToggleInput(parent, opts)
     })
 
     local enabled = false
-    local value   = opts.default or 16
+    local value = opts.default or 16
 
     local lbl = new("TextLabel", {
         Parent = row,
@@ -600,7 +587,6 @@ local function createToggleInput(parent, opts)
         TextXAlignment = Enum.TextXAlignment.Left,
     })
 
-    -- Toggle (kaydırıcı)
     local toggle = new("TextButton", {
         Parent = row,
         Size = UDim2.new(0, 42, 0, 22),
@@ -622,7 +608,6 @@ local function createToggleInput(parent, opts)
     })
     corner(dot, 8)
 
-    -- Sayı kutusu
     local input = new("TextBox", {
         Parent = row,
         Size = UDim2.new(0, 68, 0, 22),
@@ -671,35 +656,25 @@ local function createToggleInput(parent, opts)
     }
 end
 
--- ==================== KATEGORİLERİ OLUŞTUR ====================
+-- ==================== KATEGORİLER ====================
 createCategory("Main")
 createCategory("Misc")
 
--- Main > Speed
 do
     local _, body = createAccordion(pages.Main, "Speed")
     createToggleInput(body, {
-        label   = "Hız (1 - 1200)",
-        min     = 1,
-        max     = 1200,
-        default = 16,
-        onChanged = function(en, val)
-            print("[Lonex] Speed:", en, val)
-        end,
+        label = "Hız (1 - 1200)",
+        min = 1, max = 1200, default = 16,
+        onChanged = function(en, val) print("[Lonex] Speed:", en, val) end,
     })
 end
 
--- Misc > Örnek
 do
     local _, body = createAccordion(pages.Misc, "Örnek Özellik")
     createToggleInput(body, {
-        label   = "Değer",
-        min     = 1,
-        max     = 1200,
-        default = 50,
-        onChanged = function(en, val)
-            print("[Lonex] Misc:", en, val)
-        end,
+        label = "Değer",
+        min = 1, max = 1200, default = 50,
+        onChanged = function(en, val) print("[Lonex] Misc:", en, val) end,
     })
 end
 
